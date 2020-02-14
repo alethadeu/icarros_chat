@@ -17,6 +17,8 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
+  progress_dialog: ^1.2.0
+  shared_preferences: ^0.5.6
   flutter_mobx: ^0.3.3+3
   mobx: ^0.3.9+3
   dio: ^3.0.7

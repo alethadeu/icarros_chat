@@ -1,23 +1,39 @@
 import 'package:dio/dio.dart';
+import 'package:icarros_chat/app/service/dio_config/base_dio.dart';
+import 'package:icarros_chat/app/service/dio_config/logging_interceptors.dart';
+import 'package:icarros_chat/app/utils/shared_pref.dart';
 import 'package:icarros_chat/commom.dart';
 import 'package:icarros_chat/model/user.dart';
+import 'package:icarros_chat/app/utils/constants.dart' as Constants;
+import 'package:mobx/mobx.dart';
 
 class UserListRemote {  
-  Future<Result<List<User>, Error>> getUsers() async {
-    final dio = Dio();
+  Future<Result> getUsers() async {
+    final dio = createDio();
+    dio.interceptors.add(LogginInterceptors());
     final map = Map<String, dynamic>();
-    final result = Result();
+    Result result;
+    final path = Constants.USERLIST_PATH;
+    SharedPref sharedPref = SharedPref();
 
-    map["Authorization"] = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NzYyNjE5MTAsImlhdCI6MTU3NjI1ODMxMCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4ODg4Iiwic3ViIjoiNSJ9.au5t0o_7LQ8VTYQRszW3q-u4ZUWYIf9P3E4_eW7Kx2s";
-    dio.options.headers = map;
+    try {
+      String token = await sharedPref.read("token");
+      map["Authorization"] = "Bearer $token";
+      dio.options.headers = map;
+    } catch (Exception) {
+      print("fon");
+    }
     
     try {
-      final response = await dio.get("http://192.168.1.213:8888/api/user/list");
+      final response = await dio.get(path);
       final list = response.data as List;
       final listUser = list.map((user) => User.fromJson(user)).toList();
-      result.data = listUser;
-    } catch (error) {
-       result.error = error;
+      ObservableList<User> observableList = ObservableList<User>();
+      observableList.addAll(listUser);
+      result = Result.success(observableList);
+    } on DioError catch (error) {
+        result = Result.error(CustomError(error.message));
+        return result; 
     }
 
     return result;

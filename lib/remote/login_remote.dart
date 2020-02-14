@@ -1,20 +1,35 @@
 import 'package:dio/dio.dart';
+import 'package:icarros_chat/app/service/dio_config/base_dio.dart';
+import 'package:icarros_chat/app/service/dio_config/logging_interceptors.dart';
+import 'package:icarros_chat/app/utils/shared_pref.dart';
 import 'package:icarros_chat/commom.dart';
 import 'package:icarros_chat/model/login_response.dart';
+import 'package:icarros_chat/app/utils/constants.dart' as Constants;
 
 class LoginRemote {
-  Future<Result<LoginResponse, Error>> doLogin(String email, String password) async {
-    final dio = Dio();
-    final result = Result();
-    final endpoint = "http://192.168.1.213:8888/api/access/login";
+  Future<Result> doLogin(String email, String password) async {
+    Dio dio = createDio();
+    dio.interceptors.add(LogginInterceptors());
+    Result result;
+    final path = Constants.LOGIN_PATH;
+    SharedPref sharedPref = SharedPref();
 
     try {
-      final response = await dio.post(endpoint, data: {"email": email, "password": password});
-      final loginResponse = response.data as LoginResponse;
-      result.data = loginResponse;
+      final response = await dio.post(path, data: {"email": email, "password": password});
+      final loginResponse = LoginResponse.fromJson(response.data);
+      result =  Result.success(loginResponse);
+      sharedPref.save("token", loginResponse.token.replaceAll("Bearer", "").replaceAll(" ", ""));
+      sharedPref.save("email", email);
+      sharedPref.save("pass", password);
+      sharedPref.save("expiresIn", loginResponse.expiresIn.toString());
+
       return result;
-    } catch (error) {
-        result.error = error;
+    } on DioError catch (error) {
+        if (400 <= error.response.statusCode && error.response.statusCode <= 499) {
+          result = Result.error(CustomError("E-mail ou senha inválidos."));
+        } else {
+          result = Result.error(CustomError(error.message));
+        }
         return result;
     }
   }

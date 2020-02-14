@@ -9,21 +9,21 @@ part of 'home_controller.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$HomeController on _HomeBase, Store {
-  final _$_errorAtom = Atom(name: '_HomeBase._error');
+  final _$resultAtom = Atom(name: '_HomeBase.result');
 
   @override
-  Error get _error {
-    _$_errorAtom.context.enforceReadPolicy(_$_errorAtom);
-    _$_errorAtom.reportObserved();
-    return super._error;
+  Result get result {
+    _$resultAtom.context.enforceReadPolicy(_$resultAtom);
+    _$resultAtom.reportObserved();
+    return super.result;
   }
 
   @override
-  set _error(Error value) {
-    _$_errorAtom.context.conditionallyRunInAction(() {
-      super._error = value;
-      _$_errorAtom.reportChanged();
-    }, _$_errorAtom, name: '${_$_errorAtom.name}_set');
+  set result(Result value) {
+    _$resultAtom.context.conditionallyRunInAction(() {
+      super.result = value;
+      _$resultAtom.reportChanged();
+    }, _$resultAtom, name: '${_$resultAtom.name}_set');
   }
 
   final _$_loginResponseAtom = Atom(name: '_HomeBase._loginResponse');
@@ -46,7 +46,7 @@ mixin _$HomeController on _HomeBase, Store {
   final _$doLoginAsyncAction = AsyncAction('doLogin');
 
   @override
-  Future doLogin(String email, String password) {
-    return _$doLoginAsyncAction.run(() => super.doLogin(email, password));
+  Future doLogin() {
+    return _$doLoginAsyncAction.run(() => super.doLogin());
   }
 }

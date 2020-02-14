@@ -7,7 +7,7 @@ class UserRepository {
   
   UserRepository(this._userListRemote);
 
-  Future<Result<List<User>, Error>> fetchUsers() {
+  Future<Result> fetchUsers() {
     return _userListRemote.getUsers();
   }
 }

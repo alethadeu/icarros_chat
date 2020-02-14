@@ -4,6 +4,7 @@ import 'package:mobx/mobx.dart';
 
 import '../../../commom.dart';
 
+
 part 'user_list_controller.g.dart';
 
 class UserListController = _UserListBase with _$UserListController;
@@ -13,20 +14,21 @@ abstract class _UserListBase with Store {
   _UserListBase(this._repository);
 
   @observable
-  List<User> _list;
+  ObservableList<User> list;
 
   @observable
-  Error _error;
+  Result result;
 
   @action 
   Future getUsers() async {
-    Result<List<User>, Error> result =  await _repository.fetchUsers();
-    if(result.error != null) {
-      _error = result.error;
-    } else {
-      _list = result.data;
-    }
+    result = Result.loading();
+    result =  await _repository.fetchUsers();
+
+    if (result.hasSuccessData())
+      list = result.getSuccessData() as ObservableList<User>;  
   }
+
+  
   
 
 }
